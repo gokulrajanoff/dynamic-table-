@@ -1,0 +1,47 @@
+<aura:component controller="DynamicTableClass" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global" >
+	<aura:attribute name="Table_header_Records" type="object"/>
+    <aura:attribute name="Error" type="boolean" default="false" description="use for displaying error in query or backend exception"/>
+    <aura:attribute name="Message" type="boolean" default="false" description="use for display no record found message"/>
+    <aura:handler name="init" value="{!this}" action="{!c.getRecordsForTable}"/>
+    <aura:attribute name="showHeaders" type="Boolean" default="false"/>
+    <article class="slds-card">
+    <aura:if isTrue="{!v.Error}">
+               <div class="slds-text-color--error">Error In Query Or Backend Exception, check With it </div>
+            </aura:if>
+        <aura:if isTrue="{!v.Message}">
+               <div class="slds-text-color--error"> No Result Found...</div>
+            </aura:if>
+       <aura:if isTrue="{!v.showHeaders}">
+           <div class="slds-center" style="align:center;">
+       <div class="slds-table--header-fixed_container" style="height:350px;">
+    <div class="slds-scrollable_y" style="height:100%;">
+       <table class="slds-table slds-table_bordered slds-table--header-fixed">
+         <thead>
+           <tr class="slds-text-title--caps">
+               <aura:iteration items="{!v.Table_header_Records.headerList}" var="h">
+               <th scope="col" onclick="{!c.sortColumn}" data-value="{!h.index}">
+                  <div class="slds-truncate slds-cell-fixed" title="{!h.name}">{!h.name}
+            <aura:if isTrue="{! (h.sorted == 0) }">&nbsp;  &#9660; </aura:if>
+            <aura:if isTrue="{! (h.sorted == 1) }"> &nbsp;  &#9650; </aura:if>
+                   </div>
+               </th>
+               </aura:iteration>
+               </tr>
+         </thead>
+         <tbody>
+            <aura:iteration items="{!v.Table_header_Records.ListOfEachRecord}" var="tar">
+                    <tr onclick="{!c.displayfields}" data-value="{!tar.recordId}">
+                  <aura:iteration items="{!tar.recordValue}" var="value">
+                  <td>
+                    <a><div class="slds-truncate">{!value}</div></a>
+                  </td>
+                  </aura:iteration>
+               </tr>
+            </aura:iteration>
+         </tbody>
+      </table>
+       </div></div>
+        </div>
+           </aura:if>
+    </article>
+</aura:component>

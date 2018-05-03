@@ -1,0 +1,102 @@
+public class DynamicTableClass {
+
+    @AuraEnabled
+    public static object Get_Record_For_Table_Input_From_Query(String objectName,String queryFields,String fullQuery)
+    {
+        Integer headerindex=0;
+        TargetTable TargetTable_inst = new TargetTable();
+        List<EachRecord> allListOfRecords = new List<EachRecord>();
+        String Query=fullQuery;
+        //split all the fields into a list of strings
+        List<String> fieldList= queryFields.split(',');
+        //Creating a Dynamic Object Type with Custom object name
+        String listType = 'List<' + objectName + '>';
+        //Creating a Dynamic Record Type with Custom object name
+        String EachRecordType =  ''+objectName+'';
+        System.debug('listType'+listType);
+        System.debug('EachRecordType'+EachRecordType);
+        //Creating a generic Sobject to hold data of custom object
+        List<SObject> ListOfRecords = (List<SObject>)Type.forName(listType).newInstance();
+        SObject IndividualMember = (SObject)Type.forName(EachRecordType).newInstance();
+        //Execute the Query to get and store the data in Generic object
+        ListOfRecords = Database.query(Query);
+        system.debug(ListOfRecords);
+        //object field map
+        Map<String, Schema.SObjectField> objectFields = Schema.getGlobalDescribe().get(objectName).getDescribe().fields.getMap();
+        for(Integer i=0;i<ListOfRecords.size();i++)
+            {
+                IndividualMember = ListOfRecords[i];
+                EachRecord Each_record_nested_List_Of_Fields = new EachRecord();
+                List<object> temp = new List<object>();
+              for(String field :fieldList)
+              {   //record id
+                  if(field=='id')
+                  {
+                      Each_record_nested_List_Of_Fields.recordId=(Id)IndividualMember.get(field);
+                  }
+                  //if there is any relation like account.name
+                  if(field.containsAny('\\.'))
+                  {
+                      List<String> relation = field.split('\\.');
+                      //get the actual value not id in relation
+                      temp.add(IndividualMember.getSobject(relation[0]).get(relation[1]));
+                  }
+                  else
+                  {		//except is store all field and values
+                      if(field!='id'){
+                     temp.add((IndividualMember.get(field)==null)?'':IndividualMember.get(field));
+                      }
+                  }
+               }
+                System.debug('i='+i+'-'+temp);
+               Each_record_nested_List_Of_Fields.recordValue=temp;
+			allListOfRecords.add(Each_record_nested_List_Of_Fields);
+            }
+
+        //prepare header
+        List<header> headerList = new List<header>();
+
+        for(String field :fieldList)
+        {
+            if(field!='id'){
+            header h = new header();
+            h.index=headerindex++;
+            String s = field;
+            //removing __c
+            Integer i=s.lastIndexOf('_');
+            if(i!=-1)
+            {
+               s=s.substring(0,i);
+            }
+            //replacing _ with space so we get account_name = account name
+            s=s.replaceAll('_',' ');
+            system.debug('String'+s);
+            h.name=s;
+            h.sorted=2;
+            headerList.add(h);
+            }
+        }
+        //system.debug('Header:'+headerList);
+        TargetTable_inst.headerList=headerList;
+        TargetTable_inst.records=ListOfRecords;
+        TargetTable_inst.ListOfEachRecord=allListOfRecords;
+        return TargetTable_inst;
+
+    }
+public class header{
+        @AuraEnabled public String name; //Name of the Field
+        @AuraEnabled public String api;  //Api of the Field
+        @AuraEnabled public Integer sorted; //Is the FieldSorted
+        @AuraEnabled public Integer index; //Index of the Field on record
+    }
+    public class EachRecord{
+        @AuraEnabled public Map<String,object> fieldValuePair; //The field and Its corresponding Value
+        @AuraEnabled public List<object> recordValue;  //Record
+        @AuraEnabled public Id recordId; //Record Id used for Firing Events
+    }
+    public class TargetTable{
+        @AuraEnabled public List<header> headerList; //Header wrapper
+        @AuraEnabled public List <sObject> records; //actual list of records
+        @AuraEnabled public List <EachRecord> ListOfEachRecord; //curated wrapped list of record facilitated for table
+    }
+}
