@@ -16,6 +16,7 @@
        <div class="slds-table--header-fixed_container" style="height:350px;">
     <div class="slds-scrollable_y" style="height:100%;">
        <table class="slds-table slds-table_bordered slds-table--header-fixed">
+
          <thead>
            <tr class="slds-text-title--caps">
                <aura:iteration items="{!v.Table_header_Records.headerList}" var="h">
@@ -27,21 +28,29 @@
                </th>
                </aura:iteration>
                </tr>
+
+
          </thead>
+
          <tbody>
+
+
+            <!--### display all records of searchResult attribute by aura:iteration ###-->
             <aura:iteration items="{!v.Table_header_Records.ListOfEachRecord}" var="tar">
-                    <tr onclick="{!c.displayfields}" data-value="{!tar.recordId}">
+
+                    <tr onclick="{!c.DOSomeThingOnCLickOfARow}" data-value="{!tar.recordId}">
                   <aura:iteration items="{!tar.recordValue}" var="value">
                   <td>
                     <a><div class="slds-truncate">{!value}</div></a>
                   </td>
                   </aura:iteration>
                </tr>
+
             </aura:iteration>
          </tbody>
       </table>
        </div></div>
-        </div>
+               </div>
            </aura:if>
     </article>
 </aura:component>

@@ -1,6 +1,7 @@
 ({
 	getRecordsForTable : function(component, event, helper) {
-        var action=component.get("c.displayTable");
+        var action=component.get("c.Get_Record_For_Table_Input_From_Query");
+        action.setParams({"objectName":"contact","queryFields":"name,title,phone,email","fullQuery":"select name,title,phone,email from contact"});
         action.setCallback(this,function(response)
                            {
                                component.set("v.Table_header_Records",response.getReturnValue());
@@ -61,6 +62,9 @@
         console.log(Wrapedrecords);
         component.set("v.Table_header_Records",Wrapedrecords);
 
+
+    },
+    DOSomeThingOnCLickOfARow : function(component, event, helper) {
 
     }
 
