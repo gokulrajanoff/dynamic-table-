@@ -1,7 +1,3 @@
 <aura:application extends="force:slds">
-	<center><h1>Table1</h1></center>
-    <c:testDynamicComponent ></c:testDynamicComponent>
-    <br/>
-    <center><h1>Table2</h1></center>
-    <c:DynamicTablecomponent ></c:DynamicTablecomponent>
+	<c:Lightning_Data_Table_Component Object='contact' queryFields='id,name,email' fullQuery='select id,name,email from contact'></c:Lightning_Data_Table_Component>
 </aura:application>
